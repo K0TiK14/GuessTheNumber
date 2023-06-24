@@ -1,24 +1,31 @@
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 /**
  * A class that implements the game "Guess the number". The human and computer change roles after the game is over.
  */
 class GuessTheNumber {
     private var number = 0 // picked number
-    private var currentPlayer = "HUMAN"
+    private var firstPlayer = Player.HUMAN
+    private var secondPlayer = Player.HUMAN
     private var gameFinished = false // end of game flag
 
     private var min = 0 // min and max - range for guessing the number by computer
     private var max = 100
 
+    enum class Player {
+        HUMAN, COMPUTER
+    }
+
     /**
      * Function to start the game
      */
     fun startGame() {
-        if (currentPlayer == "HUMAN") {
+        menu()
+        if (firstPlayer == Player.COMPUTER) {
             println("I picked a number between 0 and 100. Can you guess it?")
             number = Random.nextInt(101) // generate a number from 0 to 100
-        } else { // if currentPlayer == "COMPUTER"
+        } else { // if firstPlayer == HUMAN
             println("Pick a number between 0 and 100:")
 
             var a = readLine()?.toIntOrNull()
@@ -31,7 +38,6 @@ class GuessTheNumber {
 
         while (!gameFinished) takeTurn()
 
-        currentPlayer = getNextPlayer() // change player
         gameFinished = false // reset end of game flag
     }
 
@@ -39,7 +45,7 @@ class GuessTheNumber {
      * Function for making a player's turn
      */
     private fun takeTurn() {
-        if (currentPlayer == "HUMAN") {
+        if (secondPlayer == Player.HUMAN) {
             println("Enter your guess: ")
 
             var playerGuess = readLine()?.toIntOrNull()
@@ -58,7 +64,7 @@ class GuessTheNumber {
                 println("The number is lower.")
             }
 
-        } else { // if currentPlayer == "COMPUTER"
+        } else { // if secondPlayer == COMPUTER
             val computerGuess = (min + max) / 2
             println("Computer's guess: $computerGuess")
 
@@ -70,10 +76,10 @@ class GuessTheNumber {
                 max = 100
             } else if (computerGuess < number) {
                 println("The number is higher.")
-                min = computerGuess
+                min = computerGuess + 1
             } else {
                 println("The number is lower.")
-                max = computerGuess
+                max = computerGuess - 1
             }
         }
     }
@@ -81,19 +87,41 @@ class GuessTheNumber {
     /**
      * Function what changes current player
      */
-    private fun getNextPlayer(): String {
-        return if (currentPlayer == "HUMAN") "COMPUTER" else "HUMAN"
+    private fun menu() {
+        println("\t\t\tMenu")
+        println("\t1. Human vs Computer")
+        println("\t2. Computer vs Human")
+        println("\t3. Human vs Human")
+        println("\t4. Computer vs Computer")
+        println("\t0. Exit")
+        var choice = readLine()?.toIntOrNull()
+        while (choice == null) {
+            println("Invalid input. Please enter a valid choice:")
+            choice = readLine()?.toIntOrNull()
+        }
+        when (choice) {
+            0 -> exitProcess(0)
+            1 -> {
+                firstPlayer = Player.HUMAN
+                secondPlayer = Player.COMPUTER
+            }
+            2 -> {
+                firstPlayer = Player.COMPUTER
+                secondPlayer = Player.HUMAN
+            }
+            3 -> {
+                firstPlayer = Player.HUMAN
+                secondPlayer = Player.HUMAN
+            }
+            4 -> {
+                firstPlayer = Player.COMPUTER
+                secondPlayer = Player.COMPUTER
+            }
+        }
     }
 }
 
 fun main() {
     val game = GuessTheNumber()
-    var playAgain = true
-
-    while (playAgain) {
-        game.startGame()
-        println("Do you want to play again? (yes/no): ")
-        val answer = readLine()
-        playAgain = (answer == "yes")
-    }
+    while (true) game.startGame()
 }
